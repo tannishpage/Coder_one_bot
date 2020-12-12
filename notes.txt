@@ -1,0 +1,19 @@
+We can prioritize two actions.
+
+1. We can aim to eliminate the other player by killing them
+2. We can aim to gain maximum points by being non-lethal
+3. We can half-half points and elimiation
+
+For 1:
+   For this one, we need to track the location of two things, one the bombs and two the player.
+   Since our goal is to eliminate the player, we want to ensure we have as many bombs as possible
+   While we place bombs around or in range of the opponent. This way we ensure we take out the player
+   as soon as possible.
+   
+For 2:
+   We need to track the location of the bombs and the player and every other point giving object
+   we want to make sure that we steal points from the opponent as well as get our own points.
+   Since we aren't aiming to eliminate the opponent we don't have to place bombs such that the opponent is in range.
+   
+For 3:
+   Prioritize placing bomb in range of opponent when it is near, otherwise aim to get points
