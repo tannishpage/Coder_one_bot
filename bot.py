@@ -48,12 +48,8 @@ class Agent:
 			s = [[str(e) for e in row] for row in self._find_path_to_location(
 														player_state.location,
 														opponent_location[1])]
-			lens = [max(map(len, col)) for col in zip(*s)]
-			fmt = '\t'.join('{{:{}}}'.format(x) for x in lens)
-			table = [fmt.format(*row) for row in s]
+			table = [ "\t".join(x) for x in s]
 			print ('\n'.join(table))
-
-			print()
 		else:
 			# If we run out of ammo, we must,
 			# prioritize ammo collection until we have 3 bombs
@@ -66,8 +62,10 @@ class Agent:
 	def _find_path_to_location(self, from_loc, to_loc):
 		visited = [[False for i in range(self._COL)] for j in range(self._ROW)]
 		distance_mat = [[-1 for i in range(self._COL)] for j in range(self._ROW)]
-		visited[from_loc[0]][from_loc[1]] = True
-		distance_mat[from_loc[0]][from_loc[1]] = 0
+		print(from_loc)
+		print(to_loc)
+		visited[from_loc[1]][from_loc[0]] = True
+		distance_mat[from_loc[1]][from_loc[0]] = 0
 		q = deque()
 		rowNum = [-1, 0, 0, 1]
 		colNum = [0, -1, 1, 0]
@@ -79,16 +77,16 @@ class Agent:
 
 			pt = curr.point
 			if pt[0] == to_loc[0] and pt[1] == to_loc[1]:
-				distance_mat[to_loc[0]][to_loc[1]] = -2
-				return distance_mat
+				distance_mat[to_loc[1]][to_loc[0]] = -2
+				return (distance_mat, curr.dist)
 
 			for i in range(4):
-				row = pt[0] + rowNum[i]
-				col = pt[1] + colNum[i]
+				row = pt[1] + rowNum[i]
+				col = pt[0] + colNum[i]
 
-				if (self._isValid(row, col) and not visited[row][col]):
+				if (self._isValid(col, row) and not visited[row][col]):
 					visited[row][col] = True
-					adj_cell = Node((row, col), curr.dist + 1)
+					adj_cell = Node((col, row), curr.dist + 1)
 					distance_mat[row][col] = adj_cell.dist
 					q.append(adj_cell)
 		return -1
