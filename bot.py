@@ -79,7 +79,7 @@ class Agent:
 	
 		return game_map
 
-	def _get_direction_of_location(self, location):
+	def _get_direction_of_location(self, location, tile):
 
 		# see where the tile is relative to our current location
 		diff = tuple(x-y for x, y in zip(self.location, tile))
