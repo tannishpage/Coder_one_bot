@@ -19,6 +19,11 @@ from collections import deque
 # import pandas as pd
 # import sklearn
 
+class Node: # For Breadth First Search
+	def __init__(self, point, dist):
+		self.point = point
+		self.dist = dist
+
 class Agent:
 
 	def __init__(self):
@@ -27,6 +32,8 @@ class Agent:
 		'''
 		# a list of all the actions your Agent can choose from
 		self._actions = ['', 'u', 'd', 'l','r','p']
+		self._ROW = 10
+		self._COL = 12
 
 	def next_move(self, game_state, player_state):
 
@@ -40,6 +47,7 @@ class Agent:
 		# about 1/10th of a tick? ~ 0.0005 seconds (depends on system)
 
 		## Agressive Bot Code ##
+		self._game_state = game_state
 		opponent_location = game_state.opponents(self._my_id)
 
 		if player_state.ammo >= 1:
@@ -48,17 +56,20 @@ class Agent:
 			# then as we wait for it to explode we must pick up bombs that are
 			# in close vacinity of the opponent.
 
+
 			action = self._get_next_move(opponent_location)
+			s = [[str(e) for e in row] for row in self._find_path_to_location(
+														player_state.location,
+														opponent_location[1])]
+			table = [ "\t".join(x) for x in s]
+			print ('\n'.join(table))
+
 		else:
 			pass
 			# If we run out of ammo, we must,
 			# prioritize ammo collection until we have 3 bombs
 
 		return action
-
-
-	def _find_path_to_location(self, location):
-		pass
 
 	def _get_matrix(self, game_state):
 		# get matrix from here https://www.notion.so/Tips-Tricks-and-Resources-f494e36372df44368f1d8b04e41038c5
@@ -78,6 +89,43 @@ class Agent:
 					game_map[y][x] = 9      # using 9 here as 'free' since 0 = Player 1 whaaaat
 	
 		return game_map
+
+
+	def _isValid(self, row: int, col: int):
+		return self._game_state.is_in_bounds((row, col)) and (self._game_state.entity_at((row, col)) not in ["ib", "sb", "ob", "b"])
+
+	def _find_path_to_location(self, from_loc, to_loc):
+		visited = [[False for i in range(self._COL)] for j in range(self._ROW)]
+		distance_mat = [[-1 for i in range(self._COL)] for j in range(self._ROW)]
+		print(from_loc)
+		print(to_loc)
+		visited[from_loc[1]][from_loc[0]] = True
+		distance_mat[from_loc[1]][from_loc[0]] = 0
+		q = deque()
+		rowNum = [-1, 0, 0, 1]
+		colNum = [0, -1, 1, 0]
+		s = Node(from_loc, 0)
+		q.append(s)
+
+		while q:
+			curr = q.popleft()
+
+			pt = curr.point
+			if pt[0] == to_loc[0] and pt[1] == to_loc[1]:
+				distance_mat[to_loc[1]][to_loc[0]] = -2
+				return (distance_mat, curr.dist)
+
+			for i in range(4):
+				row = pt[1] + rowNum[i]
+				col = pt[0] + colNum[i]
+
+				if (self._isValid(col, row) and not visited[row][col]):
+					visited[row][col] = True
+					adj_cell = Node((col, row), curr.dist + 1)
+					distance_mat[row][col] = adj_cell.dist
+					q.append(adj_cell)
+		return -1
+
 
 	def _get_direction_of_location(self, location, tile):
 
@@ -99,4 +147,4 @@ class Agent:
 		return action
 
 	def _get_next_move(self, location):
-		pass
+		return ""
