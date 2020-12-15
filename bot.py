@@ -11,6 +11,8 @@ BIO:
 # import any external packages by un-commenting them
 # if you'd like to test / request any additional packages - please check with the Coder One team
 import random
+import numpy as np
+import time
 from collections import deque
 # import time
 # import numpy as np
@@ -36,6 +38,14 @@ class Agent:
 	def next_move(self, game_state, player_state):
 
 		self._my_id = player_state.id # Getting my id
+
+		# test how long it takes to construct game map
+		start_time = time.time()
+		self._map = self._get_matrix(game_state)
+		end_time = time.time()
+		print(f"Time to construct game_map:  {end_time - start_time:.10f}") 
+		# about 1/10th of a tick? ~ 0.0005 seconds (depends on system)
+
 		## Agressive Bot Code ##
 		self._game_state = game_state
 		opponent_location = game_state.opponents(self._my_id)
@@ -45,16 +55,41 @@ class Agent:
 			# if and when we are within range of placing a bomb, we must place the bomb
 			# then as we wait for it to explode we must pick up bombs that are
 			# in close vacinity of the opponent.
+
+
+			action = self._get_next_move(opponent_location)
 			s = [[str(e) for e in row] for row in self._find_path_to_location(
 														player_state.location,
 														opponent_location[1])]
 			table = [ "\t".join(x) for x in s]
 			print ('\n'.join(table))
+
 		else:
+			pass
 			# If we run out of ammo, we must,
 			# prioritize ammo collection until we have 3 bombs
-			pass
-		return ""
+
+		return action
+
+	def _get_matrix(self, game_state):
+		# get matrix from here https://www.notion.so/Tips-Tricks-and-Resources-f494e36372df44368f1d8b04e41038c5
+		cols = game_state.size[0]
+		rows = game_state.size[1]
+
+		game_map = np.zeros((rows, cols)).astype(str)
+
+		for x in range(cols):
+			# print(f"x: {x}")
+			for y in range(rows):
+				entity = game_state.entity_at((x,y))
+
+				if entity is not None:
+					game_map[y][x] = entity
+				else:
+					game_map[y][x] = 9      # using 9 here as 'free' since 0 = Player 1 whaaaat
+	
+		return game_map
+
 
 	def _isValid(self, row: int, col: int):
 		return self._game_state.is_in_bounds((row, col)) and (self._game_state.entity_at((row, col)) not in ["ib", "sb", "ob", "b"])
@@ -91,7 +126,8 @@ class Agent:
 					q.append(adj_cell)
 		return -1
 
-	def _get_direction_of_location(self, location):
+
+	def _get_direction_of_location(self, location, tile):
 
 		# see where the tile is relative to our current location
 		diff = tuple(x-y for x, y in zip(self.location, tile))
@@ -111,4 +147,4 @@ class Agent:
 		return action
 
 	def _get_next_move(self, location):
-		pass
+		return ""

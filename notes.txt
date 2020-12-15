@@ -17,3 +17,9 @@ For 2:
    
 For 3:
    Prioritize placing bomb in range of opponent when it is near, otherwise aim to get points
+
+
+The bomb takes 3.5 seconds to detonate, one tick is 0.05 seconds
+so it takes 3.5/0.05 = 70 ticks, which means the opponent has 70 moves
+before bomb explodes? So Strategy 1, will be hard to do unless
+we can trap them
