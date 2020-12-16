@@ -50,12 +50,13 @@ class Agent:
 
 		## Agressive Bot Code ##
 		self._game_state = game_state
-		opponent_location = game_state.opponents(self._my_id)
+		self._opponent_location = game_state.opponents(self._my_id)
 		self.location = player_state.location
 		bombs_in_range = self._get_bombs_in_range(player_state.location, game_state.bombs)
 		surrounding_tiles = self._get_surrounding_tiles(player_state.location)
 		empty_tiles = self._get_empty_tiles(surrounding_tiles)
-
+		self._all_solid_entities = ["ib", self._opponent_location[0], "sb" , "ob", "b"]
+		self._not_all_solid_entities = ["ib", self._opponent_location[0], "ob", "b"]
 		# Moving if we are on a bomb or in range of bombs
 		if (game_state.entity_at(player_state.location) == 'b'):
 			# Let's start collecting Treasure Cheasts
@@ -73,7 +74,7 @@ class Agent:
 					action = random.choice(['u', 'd', 'l','r'])
 			return action
 
-		elif  (bombs_in_range != []):
+		elif (bombs_in_range != []):
 			print("2")
 			if game_state.treasure != []: # Collect treasures
 				action = self._get_direction_of_location(player_state.location, 
@@ -98,7 +99,7 @@ class Agent:
 			# if and when we are within range of placing a bomb, we must place the bomb
 			# then as we wait for it to explode we must pick up bombs that are
 			# in close vacinity of the opponent.
-			action = self._get_next_move(player_state.location, opponent_location[1])
+			action = self._get_next_move(player_state.location, self._opponent_location[0])
 			if player_state.ammo <= 1:
 				self._ammo_collector = True
 
@@ -132,10 +133,10 @@ class Agent:
 		return game_map
 
 
-	def _isValid(self, row: int, col: int):
-		return self._game_state.is_in_bounds((row, col)) and (self._game_state.entity_at((row, col)) not in ["ib", "sb", "ob", "b"])
+	def _isValid(self, row, col, entities):
+		return self._game_state.is_in_bounds((row, col)) and (self._game_state.entity_at((row, col)) not in ["ib", self._opponent_location[0], "sb" , "ob", "b"])
 
-	def _find_path_to_location(self, from_loc, to_loc):
+	def _find_path_to_location(self, from_loc, to_loc, was_none):
 		visited = [[False for i in range(self._COL)] for j in range(self._ROW)]
 		distance_mat = [[-1 for i in range(self._COL)] for j in range(self._ROW)]
 		visited[from_loc[1]][from_loc[0]] = True
@@ -161,11 +162,18 @@ class Agent:
 				row = pt[1] + rowNum[i]
 				col = pt[0] + colNum[i]
 
-				if (self._isValid(col, row) and not visited[row][col]):
-					visited[row][col] = True
-					adj_cell = Node((col, row), curr.dist + 1, curr)
-					distance_mat[row][col] = adj_cell.dist
-					q.append(adj_cell)
+				if not was_none:
+					if (self._isValid(col, row, self._all_solid_entities) and not visited[row][col]):
+						visited[row][col] = True
+						adj_cell = Node((col, row), curr.dist + 1, curr)
+						distance_mat[row][col] = adj_cell.dist
+						q.append(adj_cell)
+				else:
+					if (self._isValid(col, row, self._not_all_solid_entities) and not visited[row][col]):
+						visited[row][col] = True
+						adj_cell = Node((col, row), curr.dist + 1, curr)
+						distance_mat[row][col] = adj_cell.dist
+						q.append(adj_cell)
 		return None, None
 
 
@@ -192,12 +200,15 @@ class Agent:
 		minimum_dist = 1000
 		minimum_point = (0, 0)
 		for ammo in ammos:
-			point, dist = self._find_path_to_location(my_loc, ammo)
-			if dist == None:
-				continue
+			point, dist = self._find_path_to_location(my_loc, ammo, False)
+			if point == None or dist == None:
+				point, dist = self._find_path_to_location(from_loc, to_loc, True)
 			if dist < minimum_dist:
 				minimum_dist = dist
 				minimum_point = point
+
+		if self._game_state.entity_at(minimum_point) == "sb":
+			return "p"
 		return minimum_point
 
 	# returns the manhattan distance between two tiles, calculated as:
@@ -306,7 +317,11 @@ class Agent:
 		if diff in [(0, 2), (2, 0), (0, -2), (-2, 0), (0, 1), (1, 0), (0, -1), (-1, 0)]:
 			# Check if we are horizontally or Vertically away, if yes plant bomb
 			return "p"
-		point, dist = self._find_path_to_location(from_loc, to_loc)
+		point, dist = self._find_path_to_location(from_loc, to_loc, False)
+		if point == None or dist == None:
+			point, dist = self._find_path_to_location(from_loc, to_loc, True)
 		if self._get_bombs_in_range(point, self._game_state.bombs) != []:
 			return ''
+		if self._game_state.entity_at(point) == "sb":
+			return "p"
 		return self._get_direction_of_location(from_loc, point)
