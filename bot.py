@@ -59,7 +59,7 @@ class Agent:
 		# Moving if we are on a bomb or in range of bombs
 		if (game_state.entity_at(player_state.location) == 'b'):
 			# Let's start collecting Treasure Cheasts
-
+			print("1")
 			if game_state.treasure != []: # Collect treasures
 				action = self._get_direction_of_location(player_state.location, 
 				self._get_closest_ammo(player_state.location, game_state.treasure))
@@ -70,22 +70,30 @@ class Agent:
 					action = self._get_direction_of_location(self.location, random_tile)
 				else:
 					# if there isn't a free spot to move to, we're probably stuck here
-					action = ''
+					action = random.choice(['u', 'd', 'l','r'])
 			return action
 
 		elif  (bombs_in_range != []):
+			print("2")
+			if game_state.treasure != []: # Collect treasures
+				action = self._get_direction_of_location(player_state.location, 
+				self._get_closest_ammo(player_state.location, game_state.treasure))
+				return action
+			if game_state.ammo != []:
+				action = self._get_direction_of_location(player_state.location, 
+				self._get_closest_ammo(player_state.location, game_state.ammo))
+				return action
 			if empty_tiles:
-
 				# get the safest tile for us to move to
-				safest_tile = self._get_safest_tile(empty_tiles, bombs_in_range)	
+				safest_tile = self._get_safest_tile(empty_tiles, bombs_in_range)
 
 				action = self._get_direction_of_location(self.location, safest_tile)
-
 			else:
-				action = random.choice(self._actions)
+				action = random.choice(['u', 'd', 'l','r'])
 			return action
 
 		if not self._ammo_collector:
+			print("3")
 			# Find a path to the opponent's location and travel toward it
 			# if and when we are within range of placing a bomb, we must place the bomb
 			# then as we wait for it to explode we must pick up bombs that are
@@ -95,6 +103,7 @@ class Agent:
 				self._ammo_collector = True
 
 		else:
+			print("4")
 			# If we run out of ammo, we must,
 			# prioritize ammo collection until we have 2 bombs
 			action = self._get_direction_of_location(player_state.location, self._get_closest_ammo(player_state.location, game_state.ammo))
