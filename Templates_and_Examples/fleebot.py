@@ -72,7 +72,7 @@ class agent:
 				action = self.move_to_tile(self.location, safest_tile)
 
 			else:
-				action = random.choice(actions)	
+				action = random.choice(actions)
 
 		# if there are no bombs in range
 		else:
