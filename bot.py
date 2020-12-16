@@ -52,7 +52,6 @@ class Agent:
 
 		## Agressive Bot Code ##
 		self._game_state = game_state
-		self._location = player_state.location
 		opponent_location = game_state.opponents(self._my_id)
 		if self._bomb_down:
 			# Let's start collecting Treasure Cheasts or bombs depending on
@@ -61,24 +60,22 @@ class Agent:
 				self._bomb_down = False
 
 			# For now it's just collecting bombs
-			action = self._get_direction_of_location(self._location, self._get_closest_ammo(player_state.location, game_state.ammo))
+			action = self._get_direction_of_location(player_state.location, self._get_closest_ammo(player_state.location, game_state.ammo))
 
 			if action == '':  # e.g. no bomb/treasure in sight, we gotta move away from bomb
 				print("I'm on a bomb. I'm going to move.")
-				bombs_in_range = self.get_bombs_in_range(self._location, game_state.bombs)
+				bombs_in_range = self.get_bombs_in_range(player_state.location, game_state.bombs)
 
 				# get our surrounding tiles
-				surrounding_tiles = self.get_surrounding_tiles(self._location)
+				surrounding_tiles = self.get_surrounding_tiles(player_state.location)
 
 				# get list of empty tiles around us
 				empty_tiles = self.get_empty_tiles(surrounding_tiles)
+
 				if empty_tiles:
-
 					# get the safest tile for us to move to
-					safest_tile = self.get_safest_tile(empty_tiles, bombs_in_range)
-
+					safest_tile = self.get_safest_tile(empty_tiles, bombs_in_range, player_state.location)
 					action = self._get_direction_of_location(player_state.location, safest_tile)
-
 				else:
 					# if there isn't a free spot to move to, we're probably stuck here
 					action = ''
@@ -186,6 +183,7 @@ class Agent:
 		for ammo in ammos:
 			point, dist = self._find_path_to_location(my_loc, ammo)
 			if point is None and dist is None:
+				# no path to location return None
 				return None
 			if dist < minimum_dist:
 				minimum_dist = dist
@@ -278,13 +276,13 @@ class Agent:
 
 		# given a list of tiles and bombs
 		# find the tile that's safest to move to
-	def get_safest_tile(self, tiles, bombs):
+	def get_safest_tile(self, tiles, bombs, location):
 		# which bomb is closest to us?
 		bomb_distance = 10  # some arbitrary high distance
 		closest_bomb = bombs[0]
 
 		for bomb in bombs:
-			new_bomb_distance = self.manhattan_distance(bomb, self._location)
+			new_bomb_distance = self.manhattan_distance(bomb, location)
 			if new_bomb_distance < bomb_distance:
 				bomb_distance = new_bomb_distance
 				closest_bomb = bomb
