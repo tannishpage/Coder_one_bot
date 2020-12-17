@@ -4,8 +4,7 @@ TEMPLATE for creating your own Agent to compete in
 For more info and resources, check out: https://bit.ly/aisportschallenge
 
 BIO:
-<Tell us about your Agent here>
-
+This boi loves following the opponent and also loves blowing up stuff.
 '''
 
 # import any external packages by un-commenting them
