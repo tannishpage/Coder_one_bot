@@ -59,7 +59,6 @@ class Agent:
 		# Moving if we are on a bomb or in range of bombs
 		if (game_state.entity_at(player_state.location) == 'b'):
 			# Let's start collecting Treasure Cheasts
-			print("1")
 			if game_state.treasure != []: # Collect treasures
 				action = self._get_direction_of_location(player_state.location, 
 				self._get_closest_ammo(player_state.location, game_state.treasure))
@@ -74,7 +73,6 @@ class Agent:
 			return action
 
 		elif (bombs_in_range != []):
-			print("2")
 			if game_state.treasure != []: # Collect treasures
 				action = self._get_direction_of_location(player_state.location, 
 				self._get_closest_ammo(player_state.location, game_state.treasure))
@@ -93,7 +91,6 @@ class Agent:
 			return action
 
 		if not self._ammo_collector:
-			print("3")
 			# Find a path to the opponent's location and travel toward it
 			# if and when we are within range of placing a bomb, we must place the bomb
 			# then as we wait for it to explode we must pick up bombs that are
@@ -103,7 +100,6 @@ class Agent:
 				self._ammo_collector = True
 
 		else:
-			print("4")
 			# If we run out of ammo, we must,
 			# prioritize ammo collection until we have 2 bombs
 			action = self._get_direction_of_location(player_state.location, self._get_closest_ammo(player_state.location, game_state.ammo))
@@ -201,7 +197,9 @@ class Agent:
 		for ammo in ammos:
 			point, dist = self._find_path_to_location(my_loc, ammo, False)
 			if point == None or dist == None:
-				point, dist = self._find_path_to_location(from_loc, to_loc, True)
+				point, dist = self._find_path_to_location(my_loc, ammo, True)
+			if point == None or dist == None:
+				continue
 			if dist < minimum_dist:
 				minimum_dist = dist
 				minimum_point = point
